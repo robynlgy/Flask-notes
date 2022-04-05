@@ -28,15 +28,25 @@ class LoginForm(FlaskForm):
     """Form for login user."""
 
     username = StringField("Username: ",
-                validators = [InputRequired()])
+                validators = [InputRequired(), Length(1,20,"Invalid username")])
     password = PasswordField("Password: ",
-                validators = [InputRequired()])
+                validators = [InputRequired(), Length(1,100,"Invalid password")])
 
 
 class CSRFProtectForm(FlaskForm):
     """Form just for CSRF Protection"""
 
 class NewNoteForm(FlaskForm):
+    """Form for creating a new note."""
+
+    title = StringField("Note Title: ",
+                validators = [InputRequired(),
+                Length(1,100,"Invalid title")])
+    content = TextAreaField("Content: ",
+                validators = [InputRequired()])
+
+
+class UpdateNoteForm(FlaskForm):
     """Form for creating a new note."""
 
     title = StringField("Note Title: ",

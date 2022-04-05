@@ -16,17 +16,22 @@
 
 <h2>Notes</h2>
 <ul>
-{% for note in notes %}
-<li>
-<a href="/notes/{{note.id}}/update">edit</a>
-<a href="/notes/{{note.id}}/delete">delete</a>
-<p>{{note.title}} : {{note.content}}</p>
-</li>
-{% endfor %}
+    {% for note in notes %}
+    <li>
+        <a href="/notes/{{note.id}}/update">edit</a>
+        <form action="/notes/{{note.id}}/delete" method="POST">
+            {{ CSRFform.hidden_tag() }}
+            <button type="submit">delete</button>
+        </form>
+        <p>{{note.title}} : {{note.content}}</p>
+    </li>
+    {% endfor %}
 </ul>
 
 <a href="/users/{{user.username}}/notes/add" class="btn btn-primary">Add Note</a>
-<form action="/users/{{user.username}}/delete">
+
+<form action="/users/{{user.username}}/delete" method="POST">
+    {{ CSRFform.hidden_tag() }}
     <button type="submit" class="btn btn-danger">Delete User</button>
 </form>
 

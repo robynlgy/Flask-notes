@@ -2,7 +2,7 @@
 
 from flask import Flask, render_template, redirect, request, flash, jsonify, session
 from models import  db, connect_db, User, Note
-from forms import RegisterForm, LoginForm, CSRFProtectForm, NewNoteForm
+from forms import RegisterForm, LoginForm, CSRFProtectForm, NewNoteForm, UpdateNoteForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "oh-so-secret"
@@ -43,7 +43,7 @@ def register():
         db.session.commit()
 
         session["username"] = user.username  # keep logged in
-
+        flash("User added!")
         return redirect(f"/users/{username}")
 
     else:
@@ -62,6 +62,7 @@ def login():
 
         if user:
             session["username"] = user.username  # keep logged in
+            flash("Logged in successfully!")
             return redirect(f"/users/{username}")
 
         else:
@@ -78,6 +79,7 @@ def logout():
     if form.validate_on_submit():
         session.pop("username", None)
 
+    flash("Logged out successfully!")
     return redirect("/")
 
 # ==================== USER ROUTES ====================
@@ -93,9 +95,25 @@ def show_user(username):
     user = User.query.get_or_404(username)
     CSRFform = CSRFProtectForm()
     notes = user.notes
-    print("notes...",notes)
 
     return render_template("user.html", user=user, CSRFform=CSRFform, notes = notes)
+
+@app.post("/users/<username>/delete")
+def delete_user(username):
+    """ Delete user from database """
+    user = User.query.get_or_404(username)
+ 
+    form = CSRFProtectForm()
+
+    if form.validate_on_submit():
+
+        Note.query.filter_by(owner=username).delete()
+        session.clear()
+        db.session.delete(user)
+        db.session.commit()
+        flash("You deleted a user successfully!")
+
+        return redirect("/")
 
 
 # ==================== NOTES ROUTES ====================
@@ -115,7 +133,43 @@ def add_note(username):
         db.session.add(note)
         db.session.commit()
 
-        flash('New post added')
+        flash('New note added')
         return redirect(f"/users/{username}")
 
     return render_template("new_note.html", form=form)
+
+
+@app.route('/notes/<int:note_id>/update', methods=["GET", "POST"])
+def update_note(note_id):
+    """ Show form to update new note and handle updated note."""
+
+    note = Note.query.get_or_404(note_id)
+    form = UpdateNoteForm(obj=note)
+
+    if form.validate_on_submit():
+        note.title = form.title.data 
+        note.content = form.content.data
+        username = note.owner
+
+        db.session.add(note)
+        db.session.commit()
+
+        flash('Note updated')
+        return redirect(f"/users/{username}")
+
+    return render_template("update_note.html", form=form)
+
+@app.post("/notes/<int:note_id>/delete")
+def delete_note(note_id):
+    """ Delete note from database """
+    note = Note.query.get_or_404(note_id)
+    username = note.owner
+    form = CSRFProtectForm()
+
+    if form.validate_on_submit():
+
+        db.session.delete(note)
+        db.session.commit()
+        flash("Note was deleted!")
+
+        return redirect(f"/users/{username}")
