@@ -1,22 +1,27 @@
 from click import password_option
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField
-from wtforms.validators import InputRequired
+from wtforms import StringField, PasswordField, TextAreaField
+from wtforms.validators import InputRequired, Length
 
 
 class RegisterForm(FlaskForm):
     """Form for registering new user."""
 
     username = StringField("Username: ",
-                validators = [InputRequired()])
+                validators = [InputRequired(),
+                Length(1,20,"Invalid username")])
     password = PasswordField("Password: ",
-                validators = [InputRequired()])
+                validators = [InputRequired(),
+                Length(1,100,"Invalid password")])
     email = StringField("Email: ",
-                validators = [InputRequired()])
+                validators = [InputRequired(),
+                Length(1,50,"Invalid email")])
     first_name = StringField("First Name: ",
-                    validators = [InputRequired()])
+                    validators = [InputRequired(),
+                    Length(1,30,"Invalid first name")])
     last_name = StringField("Last Name: ",
-                    validators = [InputRequired()])
+                    validators = [InputRequired(),
+                    Length(1,30,"Invalid last name")])
 
 
 class LoginForm(FlaskForm):
@@ -30,3 +35,12 @@ class LoginForm(FlaskForm):
 
 class CSRFProtectForm(FlaskForm):
     """Form just for CSRF Protection"""
+
+class NewNoteForm(FlaskForm):
+    """Form for creating a new note."""
+
+    title = StringField("Note Title: ",
+                validators = [InputRequired(),
+                Length(1,100,"Invalid title")])
+    content = TextAreaField("Content: ",
+                validators = [InputRequired()])

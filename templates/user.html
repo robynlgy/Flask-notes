@@ -4,7 +4,7 @@
 {% if 'username' in session %}
 
 <form action="/logout" method="POST">
-    {{ form.hidden_tag() }}
+    {{ CSRFform.hidden_tag() }}
     <button type="submit" class="btn btn-primary">Logout</button>
 </form>
 
@@ -14,5 +14,20 @@
 
 <h2>Email: {{ user.email }}</h2>
 
+<h2>Notes</h2>
+<ul>
+{% for note in notes %}
+<li>
+<a href="/notes/{{note.id}}/update">edit</a>
+<a href="/notes/{{note.id}}/delete">delete</a>
+<p>{{note.title}} : {{note.content}}</p>
+</li>
+{% endfor %}
+</ul>
+
+<a href="/users/{{user.username}}/notes/add" class="btn btn-primary">Add Note</a>
+<form action="/users/{{user.username}}/delete">
+    <button type="submit" class="btn btn-danger">Delete User</button>
+</form>
 
 {% endblock %}

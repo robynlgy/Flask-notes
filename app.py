@@ -1,8 +1,8 @@
 """Flask app for Notes"""
 
 from flask import Flask, render_template, redirect, request, flash, jsonify, session
-from models import  db, connect_db, User
-from forms import RegisterForm, LoginForm, CSRFProtectForm
+from models import  db, connect_db, User, Note
+from forms import RegisterForm, LoginForm, CSRFProtectForm, NewNoteForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "oh-so-secret"
@@ -13,15 +13,18 @@ app.config['SQLALCHEMY_ECHO'] = True
 connect_db(app)
 db.create_all()
 
+
 @app.get('/')
 def get_homepage():
     """Redirect to register"""
 
     return redirect("/register")
 
+# =================== USER ROUTES ===================
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    """Register user: Show a form that when submitted will register/create a user. 
+    """Register user: Show a form that when submitted will register/create a user.
     This form should accept a username, password, email, first_name, and last_name."""
 
     form = RegisterForm()
@@ -38,6 +41,8 @@ def register():
 
         db.session.add(user)
         db.session.commit()
+
+        session["username"] = user.username  # keep logged in
 
         return redirect(f"/users/{username}")
 
@@ -64,19 +69,6 @@ def login():
 
     return render_template("login.html", form=form)
 
-@app.get("/users/<username>")
-def show_user(username):
-    """ Show user's profile and their notes """
-
-    if "username" not in session:
-        flash("You must be logged in to view!")
-        return redirect("/")
-
-    else:
-        user = User.query.get_or_404(username)
-        form = CSRFProtectForm()
-        return render_template("user.html", user=user, form=form)
-
 @app.post("/logout")
 def logout():
     """Logs user out and redirects to homepage."""
@@ -88,3 +80,42 @@ def logout():
 
     return redirect("/")
 
+# ==================== USER ROUTES ====================
+
+@app.get("/users/<username>")
+def show_user(username):
+    """ Show user's profile and their notes """
+
+    if "username" not in session:
+        flash("You must be logged in to view!")
+        return redirect("/")
+
+    user = User.query.get_or_404(username)
+    CSRFform = CSRFProtectForm()
+    notes = user.notes
+    print("notes...",notes)
+
+    return render_template("user.html", user=user, CSRFform=CSRFform, notes = notes)
+
+
+# ==================== NOTES ROUTES ====================
+
+@app.route('/users/<username>/notes/add', methods=["GET", "POST"])
+def add_note(username):
+    """ Show form to add new note and handle new note."""
+
+    form = NewNoteForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+
+        note = Note(title=title,content=content,owner=username)
+
+        db.session.add(note)
+        db.session.commit()
+
+        flash('New post added')
+        return redirect(f"/users/{username}")
+
+    return render_template("new_note.html", form=form)
