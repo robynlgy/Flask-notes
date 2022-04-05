@@ -64,7 +64,7 @@ class Note(db.Model):
                    primary_key=True,
                    autoincrement=True)
     title = db.Column(db.String(100),
-                    nullable = True)
+                    nullable = False)
     content = db.Column(db.Text,
-                    nullable = True)
+                    nullable = False)
     owner = db.Column(db.String(20), db.ForeignKey('users.username'))

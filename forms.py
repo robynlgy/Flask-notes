@@ -36,8 +36,8 @@ class LoginForm(FlaskForm):
 class CSRFProtectForm(FlaskForm):
     """Form just for CSRF Protection"""
 
-class NewNoteForm(FlaskForm):
-    """Form for creating a new note."""
+class NoteForm(FlaskForm):
+    """Form for creating a new note or updating it."""
 
     title = StringField("Note Title: ",
                 validators = [InputRequired(),
@@ -46,11 +46,3 @@ class NewNoteForm(FlaskForm):
                 validators = [InputRequired()])
 
 
-class UpdateNoteForm(FlaskForm):
-    """Form for creating a new note."""
-
-    title = StringField("Note Title: ",
-                validators = [InputRequired(),
-                Length(1,100,"Invalid title")])
-    content = TextAreaField("Content: ",
-                validators = [InputRequired()])

@@ -108,7 +108,7 @@ def delete_user(username):
     if form.validate_on_submit():
 
         Note.query.filter_by(owner=username).delete()
-        session.clear()
+        session.pop("username", None)
         db.session.delete(user)
         db.session.commit()
         flash("You deleted a user successfully!")
@@ -122,7 +122,7 @@ def delete_user(username):
 def add_note(username):
     """ Show form to add new note and handle new note."""
 
-    form = NewNoteForm()
+    form = NoteForm()
 
     if form.validate_on_submit():
         title = form.title.data
@@ -144,7 +144,7 @@ def update_note(note_id):
     """ Show form to update new note and handle updated note."""
 
     note = Note.query.get_or_404(note_id)
-    form = UpdateNoteForm(obj=note)
+    form = NoteForm(obj=note)
 
     if form.validate_on_submit():
         note.title = form.title.data 
